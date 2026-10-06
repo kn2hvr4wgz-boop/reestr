@@ -310,7 +310,7 @@
   }
 
   // ---------- password gate ----------
-  var PASS_HASH = "5fafb13492584eacc7053528789fb690731de0774de8e44b6d099a88c11dedf7";
+  var PASS_HASH = "9009778948aeed6b2d23422d4d6ab4e11ddd2c421544d474da3b86b62ee4954c";
   async function sha256hex(str){
     var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
