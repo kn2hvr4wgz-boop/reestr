@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Локации · Рефлекс</title>
+  <style>
+    :root{ --bg:#fff; --text:#111; --dim:#6b6b6b; --line:#e6e6e6; --card:#f6f6f6; --accent:#d9531e; }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; background:var(--bg); }
+    body{ padding:0 20px; color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+    a{ color:inherit; }
+    .wrap{ max-width:920px; margin:auto; }
+    .section-nav{ display:flex; gap:6px; padding:22px 0 0; }
+    .section-nav a{ color:var(--dim); text-decoration:none; font-size:14px; font-weight:650; padding:10px 15px; border-radius:9px; }
+    .section-nav a:hover,.section-nav a:focus-visible{ background:var(--card); color:var(--text); }
+    .section-nav a[aria-current="page"]{ background:var(--text); color:#fff; }
+    .section-nav a:focus-visible,.location-card:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    header{ padding:44px 0 22px; }
+    .eyebrow{ font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin:0 0 10px; }
+    h1{ font-size:clamp(30px,6vw,42px); font-weight:700; letter-spacing:-.01em; line-height:1.1; margin:0 0 12px; }
+    .lede{ font-size:16px; line-height:1.55; color:#333; max-width:62ch; margin:0 0 22px; }
+    .stat-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; }
+    .stat{ background:var(--card); border-radius:8px; padding:8px 14px; font-size:13px; color:var(--dim); }
+    .stat b{ color:var(--text); }
+    .find{ display:flex; align-items:center; gap:10px; background:var(--card); border-radius:10px; padding:12px 14px; margin-bottom:16px; }
+    .find svg{ flex:none; opacity:.45; }
+    .find input{ flex:1; min-width:0; border:0; background:none; font:inherit; font-size:15px; color:var(--text); outline:none; }
+    .find input::placeholder{ color:#9a9a9a; }
+    .find:focus-within{ box-shadow:0 0 0 2px var(--accent); }
+    .grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:17px; }
+    .location-card{ display:flex; flex-direction:column; min-width:0; padding:10px; border-radius:12px; background:var(--card); text-decoration:none; transition:transform .15s ease,box-shadow .15s ease; }
+    .location-card:hover{ transform:translateY(-2px); box-shadow:0 7px 24px rgba(0,0,0,.10); }
+    .location-card img{ width:100%; aspect-ratio:600/380; object-fit:cover; border-radius:7px; background:#e2e2e2; display:block; }
+    .location-name{ font-size:15px; line-height:1.35; font-weight:650; margin:12px 2px 18px; overflow-wrap:anywhere; }
+    .location-action{ margin:auto 2px 2px; color:var(--accent); font-size:12px; font-weight:700; }
+    #empty{ display:none; text-align:center; padding:40px 0; color:var(--dim); }
+    footer{ border-top:1px solid var(--line); margin-top:34px; padding:20px 0 56px; font-size:13px; line-height:1.6; color:var(--dim); }
+    footer a{ color:var(--text); font-weight:600; text-decoration:none; border-bottom:1px solid var(--line); }
+    footer a:hover{ border-bottom-color:var(--text); }
+    #gate{ position:fixed; inset:0; background:#fff; display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; }
+    #gate .box{ width:100%; max-width:320px; text-align:center; }
+    #gate .lock{ font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:14px; }
+    #gate form{ display:flex; gap:8px; }
+    #gate input{ flex:1; min-width:0; padding:11px 13px; border-radius:8px; border:1px solid var(--line); font-size:15px; font-family:inherit; outline:none; }
+    #gate input:focus{ border-color:var(--accent); }
+    #gate button{ padding:11px 16px; border-radius:8px; border:0; background:var(--text); color:#fff; font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; }
+    #gate .err{ color:var(--accent); font-size:12.5px; margin-top:10px; min-height:1.4em; }
+    #app[hidden]{ display:none; }
+    @media(max-width:700px){ .grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } }
+    @media(max-width:480px){ .grid{ grid-template-columns:1fr; } }
+    @media(prefers-reduced-motion:reduce){ .location-card{ transition:none; } .location-card:hover{ transform:none; } }
+  </style>
+</head>
+<body>
+  <div id="gate">
+    <div class="box">
+      <p class="lock">Доступ ограничен</p>
+      <form id="gate-form" autocomplete="off">
+        <input id="gate-pass" type="password" placeholder="Пароль" aria-label="Пароль" autofocus>
+        <button type="submit">Войти</button>
+      </form>
+      <p class="err" id="gate-err" role="alert"></p>
+    </div>
+  </div>
+  <div id="app" hidden>
+    <div class="wrap">
+      <nav class="section-nav" aria-label="Разделы реестра">
+        <a href="./index.html">Актёры</a>
+        <a href="./locations.html" aria-current="page">Локации</a>
+      </nav>
+      <header>
+        <p class="eyebrow">Внутренний документ · не для распространения</p>
+        <h1>Реестр локаций</h1>
+        <p class="lede">Площадки, отсмотренные в Петербурге 8–12 октября 2026 года. Откройте карточку, чтобы посмотреть все материалы в исходной папке.</p>
+        <div class="stat-row"><span class="stat"><b id="total">29</b> площадок</span></div>
+        <label class="find">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><line x1="11" y1="11" x2="15" y2="15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <input id="search" type="search" placeholder="Найти площадку или адрес…" autocomplete="off" aria-label="Найти площадку или адрес">
+        </label>
+      </header>
+      <main>
+        <div class="grid" id="grid"></div>
+        <p id="empty">Ничего не найдено</p>
+      </main>
+      <footer>
+        <a href="https://disk.yandex.ru/d/5Nt-oi5GdQ5QUg" target="_blank" rel="noopener">Открыть всю подборку на Яндекс Диске</a><br>
+        <a href="https://disk.yandex.ru/d/5Nt-oi5GdQ5QUg/%D0%A1%D0%9A%D0%90%D0%A3%D0%A2%20%D0%9F%D0%98%D0%A2%D0%95%D0%A0%20%D0%9E%D0%9A%D0%A2%D0%AF%D0%91%D0%A0%D0%AC%20c%208-12.key" target="_blank" rel="noopener">Файл презентации скаута</a>
+      </footer>
+    </div>
+  </div>
+  <script>
+    const PASS_HASH = '9009778948aeed6b2d23422d4d6ab4e11ddd2c421544d474da3b86b62ee4954c';
+    const DISK_URL = 'https://disk.yandex.ru/d/5Nt-oi5GdQ5QUg/';
+    const norm = value => value.toLocaleLowerCase('ru').normalize('NFC').replace(/ё/g,'е').trim();
+    async function sha256hex(value){
+      const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+      return [...new Uint8Array(buffer)].map(byte => byte.toString(16).padStart(2,'0')).join('');
+    }
+    async function loadLocations(){
+      try{
+        const response = await fetch('./locations.json');
+        if(!response.ok) throw new Error('Список не загрузился');
+        const locations = await response.json();
+        const grid = document.getElementById('grid');
+        document.getElementById('total').textContent = locations.length;
+        for(const location of locations){
+          const card = document.createElement('a');
+          card.className = 'location-card';
+          card.href = DISK_URL + encodeURIComponent(location.name);
+          card.target = '_blank';
+          card.rel = 'noopener';
+          card.dataset.search = norm(location.name);
+          const image = document.createElement('img');
+          image.src = location.image;
+          image.alt = '';
+          image.loading = 'lazy';
+          const title = document.createElement('span');
+          title.className = 'location-name';
+          title.textContent = location.name;
+          const action = document.createElement('span');
+          action.className = 'location-action';
+          action.textContent = 'Смотреть материалы ↗';
+          card.append(image,title,action);
+          grid.append(card);
+        }
+        document.getElementById('search').addEventListener('input', event => {
+          const query = norm(event.target.value);
+          let visible = 0;
+          for(const card of grid.children){
+            const show = !query || card.dataset.search.includes(query);
+            card.hidden = !show;
+            if(show) visible++;
+          }
+          document.getElementById('empty').style.display = visible ? 'none' : 'block';
+        });
+      }catch(error){
+        document.getElementById('empty').textContent = 'Не удалось загрузить список площадок. Обновите страницу.';
+        document.getElementById('empty').style.display = 'block';
+      }
+    }
+    function unlock(){
+      document.getElementById('gate').remove();
+      document.getElementById('app').hidden = false;
+      loadLocations();
+    }
+    document.getElementById('gate-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      const hash = await sha256hex(document.getElementById('gate-pass').value);
+      if(hash === PASS_HASH){
+        try{ sessionStorage.setItem('unlocked','1'); }catch(error){}
+        unlock();
+      }else{
+        document.getElementById('gate-err').textContent = 'Неверный пароль';
+      }
+    });
+    try{ if(sessionStorage.getItem('unlocked') === '1') unlock(); }catch(error){}
+  </script>
+</body>
+</html>
