@@ -289,6 +289,7 @@
     .view-toggle button{ padding:9px 8px; font-size:14px; }
   }
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -312,7 +313,7 @@
   </nav>
 
   <header>
-    <p class="eyebrow">Внутренний документ · не для распространения</p>
+    <p class="eyebrow">Внутренний документ, не для распространения</p>
     <h1>Реестр кандидатов</h1>
     <p class="lede">Материалы по открытым позициям: краткая карточка на каждого кандидата и ссылки на полные фото- и видеоматериалы в личном хранилище.</p>
     <div class="stat-row">
@@ -350,6 +351,8 @@
   var BASE_PATH = ["РЕФЛЕКС","Пробы"];
   function ydLink(parts){ return "https://disk.yandex.ru/client/disk/" + parts.map(encodeURIComponent).join("/"); }
   function norm(s){ return s.toLowerCase(); }
+  // ПЕТРОВА → Петрова, ЮРИЙ ЖДАНОВ → Юрий Жданов
+  function roleTitle(s){ return String(s).replace(/[А-ЯЁA-Z][А-ЯЁA-Z\-]*/g, function(w){ return w.charAt(0) + w.slice(1).toLowerCase(); }); }
   function pluralRu(n, one, few, many){
     var n10 = n % 10, n100 = n % 100;
     if (n10 === 1 && n100 !== 11) return one;
@@ -380,7 +383,7 @@
       formP.style.display = "none";
       errP.textContent = "Попроси новую ссылку у того, кто её прислал.";
     } else {
-      lockP.textContent = "Подборка кандидатов · пароль из сообщения";
+      lockP.textContent = "Подборка кандидатов. Пароль есть в сообщении";
       try{ if (sessionStorage.getItem("pick:" + PICK.h) === "1") buildPick(PICK); }catch(e){}
     }
   }
@@ -474,7 +477,7 @@
       var head = document.createElement("div");
       head.className = "role-head";
       head.innerHTML =
-        '<span class="role-name">'+group.character+'</span>'+
+        '<span class="role-name">'+roleTitle(group.character)+'</span>'+
         '<span class="role-count">'+group.actors.length+' '+pluralRu(group.actors.length,'кандидат','кандидата','кандидатов')+'</span>';
       section.appendChild(head);
 
@@ -489,7 +492,7 @@
         var also = "";
         if (seenIn[a.actor].length > 1){
           var others = seenIn[a.actor].filter(function(c){ return c !== group.character; });
-          also = '<div class="also">+ '+others.join(", ")+'</div>';
+          also = '<div class="also">+ '+others.map(roleTitle).join(", ")+'</div>';
         }
         card.innerHTML = cardHtml(group.character, a, also);
         grid.appendChild(card);
@@ -531,7 +534,7 @@
         var card = document.createElement("div");
         card.className = "card";
         card.dataset.match = norm(item.character+" "+item.actor.actor);
-        var also = '<div class="also">'+item.character+'</div>';
+        var also = '<div class="also">'+roleTitle(item.character)+'</div>';
         card.innerHTML = cardHtml(item.character, item.actor, also);
         grid.appendChild(card);
       });
@@ -552,7 +555,7 @@
       var head = document.createElement("div");
       head.className = "role-head";
       head.innerHTML =
-        '<span class="role-name">'+group.character+'</span>'+
+        '<span class="role-name">'+roleTitle(group.character)+'</span>'+
         '<span class="role-count">'+newActors.length+' '+pluralRu(newActors.length,'кандидат','кандидата','кандидатов')+'</span>';
       section.appendChild(head);
 
@@ -567,7 +570,7 @@
         var also = "";
         if (seenIn[a.actor].length > 1){
           var others = seenIn[a.actor].filter(function(c){ return c !== group.character; });
-          also = '<div class="also">+ '+others.join(", ")+'</div>';
+          also = '<div class="also">+ '+others.map(roleTitle).join(", ")+'</div>';
         }
         card.innerHTML = cardHtml(group.character, a, also);
         grid.appendChild(card);
@@ -611,7 +614,7 @@
       section.dataset.match = norm(group.character);
       var head = document.createElement("div");
       head.className = "role-head";
-      head.innerHTML = '<span class="role-name">'+group.character+'</span>'+
+      head.innerHTML = '<span class="role-name">'+roleTitle(group.character)+'</span>'+
         '<span class="role-count">утверждён'+(appr.length > 1 ? 'ы' : '')+'</span>';
       section.appendChild(head);
       var grid = document.createElement("div");
@@ -714,7 +717,7 @@
       var section = document.createElement("section");
       var head = document.createElement("div");
       head.className = "role-head";
-      head.innerHTML = '<span class="role-name">'+role+'</span>'+
+      head.innerHTML = '<span class="role-name">'+roleTitle(role)+'</span>'+
         '<span class="role-count">'+byRole[role].length+' '+pluralRu(byRole[role].length,'кандидат','кандидата','кандидатов')+'</span>';
       section.appendChild(head);
       var grid = document.createElement("div");
