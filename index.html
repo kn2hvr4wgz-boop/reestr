@@ -337,6 +337,14 @@
     return many;
   }
 
+  // ---------- подборка по ссылке ?s=… (без пароля, только выбранные карточки) ----------
+  var PICK = null;
+  try{
+    var qs = new URLSearchParams(location.search);
+    if (qs.get("s")) PICK = { ids: qs.get("s").split(".").filter(Boolean), title: qs.get("t") || "" };
+  }catch(e){}
+  if (PICK){ var g0 = document.getElementById("gate"); if (g0) g0.style.display = "none"; }
+
   // ---------- password gate ----------
   var PASS_HASH = "9009778948aeed6b2d23422d4d6ab4e11ddd2c421544d474da3b86b62ee4954c";
   async function sha256hex(str){
@@ -344,7 +352,7 @@
     return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
   }
   function unlock(){
-    document.getElementById("gate").remove();
+    var g = document.getElementById("gate"); if (g) g.remove();
     var app = document.getElementById("app");
     app.hidden = false;
     buildPage();
@@ -364,7 +372,7 @@
     });
   }
   try{
-    if (sessionStorage.getItem("unlocked") === "1") unlock();
+    if (!PICK && sessionStorage.getItem("unlocked") === "1") unlock();
   }catch(e){}
 
   // ---------- page build (only runs after unlock) ----------
@@ -588,6 +596,60 @@
       render(btn.dataset.view);
     });
   }
+
+  async function buildPick(pick){
+    var g = document.getElementById("gate"); if (g) g.remove();
+    document.getElementById("app").hidden = false;
+    [".section-nav", ".stat-row", ".find", "#view-toggle", "footer"].forEach(function(sel){
+      var el = document.querySelector(sel); if (el) el.style.display = "none";
+    });
+    document.querySelector("header .eyebrow").textContent = "Подборка кандидатов";
+    var h1 = document.querySelector("header h1");
+    var lede = document.querySelector("header .lede");
+    h1.textContent = pick.title || "Подборка";
+    lede.textContent = "";
+    document.title = pick.title || "Подборка";
+    var list = document.getElementById("list");
+
+    var byId = {};
+    var all = [];
+    DATA.forEach(function(gr){ gr.actors.forEach(function(a){ all.push([gr.character, a]); }); });
+    var hashes = await Promise.all(all.map(function(x){ return sha256hex(x[0] + "|" + x[1].actor); }));
+    hashes.forEach(function(h, i){ byId[h.slice(0, 8)] = all[i]; });
+
+    var byRole = {}, order = [], n = 0;
+    pick.ids.forEach(function(id){
+      var hit = byId[id.toLowerCase()];
+      if (!hit) return;
+      if (!byRole[hit[0]]){ byRole[hit[0]] = []; order.push(hit[0]); }
+      if (byRole[hit[0]].indexOf(hit[1]) < 0){ byRole[hit[0]].push(hit[1]); n++; }
+    });
+    if (!n){
+      list.innerHTML = '<p class="note">Кандидатов из этой подборки уже нет в реестре.</p>';
+      return;
+    }
+    lede.textContent = n + " " + pluralRu(n, "кандидат", "кандидата", "кандидатов") +
+      (n < pick.ids.length ? " (часть уже убрана из реестра)" : "");
+    order.forEach(function(role){
+      var section = document.createElement("section");
+      var head = document.createElement("div");
+      head.className = "role-head";
+      head.innerHTML = '<span class="role-name">'+role+'</span>'+
+        '<span class="role-count">'+byRole[role].length+' '+pluralRu(byRole[role].length,'кандидат','кандидата','кандидатов')+'</span>';
+      section.appendChild(head);
+      var grid = document.createElement("div");
+      grid.className = "grid";
+      byRole[role].forEach(function(a){
+        var card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = cardHtml(role, a, "");
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+      list.appendChild(section);
+    });
+  }
+  if (PICK) buildPick(PICK);
 </script>
 </body>
 </html>
