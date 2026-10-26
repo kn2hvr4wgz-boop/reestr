@@ -320,6 +320,7 @@
       <span class="stat"><b id="stat-roles"></b> <span id="stat-roles-word"></span></span>
       <span class="stat"><b id="stat-actors"></b> <span id="stat-actors-word"></span></span>
       <span class="stat"><b id="stat-materials"></b> <span id="stat-materials-word"></span> разобрано</span>
+      <span class="stat"><b id="stat-short"></b> в шорт-листе</span>
       <span class="stat"><b id="stat-approved"></b> утверждено</span>
     </div>
     <div class="find">
@@ -330,6 +331,7 @@
       <button type="button" data-view="actors" class="active">По актёрам</button>
       <button type="button" data-view="dates">По датам</button>
       <button type="button" data-view="new">Что нового</button>
+      <button type="button" data-view="short">Шорт-лист</button>
       <button type="button" data-view="approved">Утверждённые</button>
     </div>
   </header>
@@ -458,7 +460,9 @@
     var photoHref = a.photo_url || ydLink(a.link_flat ? linkParts : linkParts.concat(["фото"]));
     var videoHref = a.video_url || ydLink(a.link_flat ? linkParts : linkParts.concat(["видео"]));
     var badge = (isNewDate(a.date) ? '<span class="badge-new">новое</span>' : '') +
-                (a.approved ? '<span class="badge-appr">утв</span>' : '');
+                (a.approved ? '<span class="badge-appr">утв</span>'
+                  : a.status === 'short' ? '<span class="badge-short">шорт</span>'
+                  : a.status === 'rejected' ? '<span class="badge-rej">отказ</span>' : '');
     return badge+
       '<img class="thumb" src="thumbs/'+a.thumb+'" alt="" loading="lazy">'+
       '<div class="name">'+a.actor+'</div>'+
@@ -606,6 +610,31 @@
     apply();
   }
 
+  function renderShort(list){
+    DATA.forEach(function(group){
+      var sh = group.actors.filter(function(a){ return !a.approved && a.status === 'short'; });
+      if (!sh.length) return;
+      var section = document.createElement("section");
+      section.dataset.match = norm(group.character);
+      var head = document.createElement("div");
+      head.className = "role-head";
+      head.innerHTML = '<span class="role-name">'+roleTitle(group.character)+'</span>'+
+        '<span class="role-count">'+sh.length+' в шорт-листе</span>';
+      section.appendChild(head);
+      var grid = document.createElement("div");
+      grid.className = "grid";
+      sh.forEach(function(a){
+        var card = document.createElement("div");
+        card.className = "card";
+        card.dataset.match = norm(group.character+" "+a.actor);
+        card.innerHTML = cardHtml(group.character, a, "");
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+      list.appendChild(section);
+    });
+  }
+
   function renderApproved(list, seenIn){
     DATA.forEach(function(group){
       var appr = group.actors.filter(function(a){ return a.approved; });
@@ -642,12 +671,14 @@
       });
     });
     if (view === "approved") renderApproved(list, seenIn);
+    else if (view === "short") renderShort(list);
     else if (view === "dates") renderByDates(list);
     else if (view === "new") renderNew(list, seenIn);
     else renderByActors(list, seenIn);
     document.getElementById("empty").textContent = (view === "new")
       ? "Ничего нового за неделю не произошло"
-      : (view === "approved" ? "Утверждённых пока нет" : "Ничего не найдено");
+      : (view === "approved" ? "Утверждённых пока нет"
+        : (view === "short" ? "В шорт-листе пока никого" : "Ничего не найдено"));
     bindSearch(list);
   }
 
@@ -667,6 +698,9 @@
     var totalAppr = 0;
     DATA.forEach(function(g){ g.actors.forEach(function(a){ if (a.approved) totalAppr++; }); });
     document.getElementById("stat-approved").textContent = totalAppr;
+    var totalShort = 0;
+    DATA.forEach(function(g){ g.actors.forEach(function(a){ if (!a.approved && a.status === 'short') totalShort++; }); });
+    document.getElementById("stat-short").textContent = totalShort;
     document.getElementById("stat-materials-word").textContent = pluralRu(totalMaterials,'материал','материала','материалов');
 
     render("actors");

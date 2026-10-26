@@ -106,3 +106,11 @@ footer a{ font-weight:500; border-bottom:1px solid var(--line); }
 #gate form{ gap:8px; }
 #gate input{ min-width:0; flex:1 1 auto; }
 #gate button{ flex:none; }
+
+/* статусы: шорт-лист и отказ */
+.card .badge-short, .card .badge-rej{ position:absolute; top:14px; right:14px; z-index:1; pointer-events:none;
+  font-size:11px; font-weight:500; padding:2px 8px; border-radius:8px; color:var(--text); }
+.card .badge-short{ background:var(--blue); }
+.card .badge-rej{ background:#ececec; color:var(--text-dim); }
+.card:has(.badge-rej){ opacity:.55; }
+.card:has(.badge-rej) .thumb{ filter:grayscale(1); }
