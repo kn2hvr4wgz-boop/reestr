@@ -114,3 +114,19 @@ footer a{ font-weight:500; border-bottom:1px solid var(--line); }
 .card .badge-rej{ background:#ececec; color:var(--text-dim); }
 .card:has(.badge-rej){ opacity:.55; }
 .card:has(.badge-rej) .thumb{ filter:grayscale(1); }
+
+/* локации: статус и объект */
+.location-img{ position:relative; display:block; }
+.loc-badge{ position:absolute; top:8px; right:8px; font-size:11px; font-weight:500; padding:2px 8px; border-radius:8px; color:var(--text); }
+.loc-approved{ background:var(--sage); }
+.loc-reserve{ background:var(--blue); }
+.loc-rejected{ background:#ececec; color:var(--text-dim); }
+.location-card:has(.loc-rejected){ opacity:.55; }
+.location-card:has(.loc-rejected) img{ filter:grayscale(1); }
+.location-for{ font-size:13px; color:var(--text-dim); margin:-12px 2px 14px; }
+#list .grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+@media(max-width:700px){ #list .grid{ grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } }
+@media(max-width:480px){ #list .grid{ grid-template-columns:1fr; } }
+.view-toggle{ display:inline-flex; flex-wrap:wrap; max-width:100%; margin-bottom:14px; }
+.view-toggle button{ border:none; background:none; font:inherit; cursor:pointer; }
+@media (max-width:480px){ .view-toggle{ display:grid; grid-template-columns:1fr 1fr; width:100%; } }

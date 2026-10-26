@@ -1,118 +1,147 @@
 [
   {
     "name": "Бараки, Пряжка. Боткина. Миргородская 3",
-    "image": "thumbs/location-01.webp"
+    "image": "thumbs/location-01.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Бестужевские курсы. Соляной 4",
-    "image": "thumbs/location-02.webp"
+    "image": "thumbs/location-02.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Видение Стеллы 6-4:Остановка Жданова 6-27 Площадь Репина",
-    "image": "thumbs/location-03.webp"
+    "image": "thumbs/location-03.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Витебский вокзал",
-    "image": "thumbs/location-04.webp"
+    "image": "thumbs/location-04.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Двор Крепса Фонтанка 64",
-    "image": "thumbs/location-05.webp"
+    "image": "thumbs/location-05.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Двор Павлова. Пестеля 7",
-    "image": "thumbs/location-06.webp"
+    "image": "thumbs/location-06.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Двор жены Крепса Грибоедова 30-32 лит Г",
-    "image": "thumbs/location-07.webp"
+    "image": "thumbs/location-07.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Двор жены Крепса. Каменоостровский 44Б",
-    "image": "thumbs/location-08.webp"
+    "image": "thumbs/location-08.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Институт Физиологии ИНТ. Наб. Макарова 6",
-    "image": "thumbs/location-09.webp"
+    "image": "thumbs/location-09.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Институт Физиологии НАТ. Наб Макарова 6",
-    "image": "thumbs/location-10.webp"
+    "image": "thumbs/location-10.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Квартира Аллилуевой. 10-я Советская ул., 17",
-    "image": "thumbs/location-11.webp"
+    "image": "thumbs/location-11.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Квартира Павлова Бенуа. 3-я линия В. О. 20",
-    "image": "thumbs/location-12.webp"
+    "image": "thumbs/location-12.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Колтуши Павлова ул.Быкова 36 В",
-    "image": "thumbs/location-13.webp"
+    "image": "thumbs/location-13.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Кочубея. Наб. реки Фонтанки, 16",
-    "image": "thumbs/location-14.webp"
+    "image": "thumbs/location-14.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Лютеранская церковь",
-    "image": "thumbs/location-15.webp"
+    "image": "thumbs/location-15.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Мост для трамваев. Старокалинкин мост",
-    "image": "thumbs/location-16.webp"
+    "image": "thumbs/location-16.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Парадная Мотовилова Ломоносова 18 (не понравилась)",
-    "image": "thumbs/location-17.webp"
+    "image": "thumbs/location-17.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Парадная Мотовилова Фонтанка 64",
-    "image": "thumbs/location-18.webp"
+    "image": "thumbs/location-18.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Парадная Мотовилова. Кирочная 24",
-    "image": "thumbs/location-19.webp"
+    "image": "thumbs/location-19.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Парадная Петровой Фонтанка 64",
-    "image": "thumbs/location-20.webp"
+    "image": "thumbs/location-20.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Парадная Петровой. Каменоостровский 1-3",
-    "image": "thumbs/location-21.webp"
+    "image": "thumbs/location-21.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Парадная. Кирочная 24 ЗЕЛЕНАЯ",
-    "image": "thumbs/location-22.webp"
+    "image": "thumbs/location-22.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Питейная. Русская рюмочная 1. Конногвардейский бул., 4",
-    "image": "thumbs/location-23.webp"
+    "image": "thumbs/location-23.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Питейная. Строганов. Конногвардейский бул., 4Б",
-    "image": "thumbs/location-24.webp"
+    "image": "thumbs/location-24.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Пятиэтажки Достоевского 36",
-    "image": "thumbs/location-25.webp"
+    "image": "thumbs/location-25.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Трамвайное Депо. Средний просп. Васильевского острова, 77И",
-    "image": "thumbs/location-26.webp"
+    "image": "thumbs/location-26.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Тюремная больница, коридор больницы, собака и рюмочная Кащенко",
-    "image": "thumbs/location-27.webp"
+    "image": "thumbs/location-27.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "Шушары",
-    "image": "thumbs/location-28.webp"
+    "image": "thumbs/location-28.jpg",
+    "trip": "Петербург, 8–12 октября"
   },
   {
     "name": "кинотеатр Родина. Караванная ул., 12",
-    "image": "thumbs/location-29.webp"
+    "image": "thumbs/location-29.jpg",
+    "trip": "Петербург, 8–12 октября"
   }
 ]

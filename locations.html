@@ -75,15 +75,20 @@
       <header>
         <p class="eyebrow">Внутренний документ, не для распространения</p>
         <h1>Реестр локаций</h1>
-        <p class="lede">Площадки, отсмотренные в Петербурге 8–12 октября 2026 года. Откройте карточку, чтобы посмотреть все материалы в исходной папке.</p>
-        <div class="stat-row"><span class="stat"><b id="total">29</b> площадок</span></div>
+        <p class="lede">Площадки со скаутинга. Откройте карточку, чтобы посмотреть все материалы в исходной папке.</p>
+        <div class="stat-row"><span class="stat"><b id="total">0</b> площадок</span><span class="stat"><b id="total-appr">0</b> утверждено</span><span class="stat"><b id="total-res">0</b> в запасе</span></div>
         <label class="find">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><line x1="11" y1="11" x2="15" y2="15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
           <input id="search" type="search" placeholder="Найти площадку или адрес…" autocomplete="off" aria-label="Найти площадку или адрес">
         </label>
+        <div class="view-toggle" id="view-toggle">
+          <button type="button" data-view="all" class="active">Все</button>
+          <button type="button" data-view="approved">Утверждённые</button>
+          <button type="button" data-view="reserve">В запасе</button>
+        </div>
       </header>
       <main>
-        <div class="grid" id="grid"></div>
+        <div id="list"></div>
         <p id="empty">Ничего не найдено</p>
       </main>
       <footer>
@@ -95,61 +100,143 @@
   <script>
     const PASS_HASH = '9009778948aeed6b2d23422d4d6ab4e11ddd2c421544d474da3b86b62ee4954c';
     const DISK_URL = 'https://disk.yandex.ru/d/5Nt-oi5GdQ5QUg/';
-    const norm = value => value.toLocaleLowerCase('ru').normalize('NFC').replace(/ё/g,'е').trim();
+    const STATUS = { approved: 'утверждена', reserve: 'в запасе', rejected: 'отказ' };
+    const norm = value => String(value || '').toLocaleLowerCase('ru').normalize('NFC').replace(/ё/g,'е').trim();
+    const plural = (n, a, b, c) => { const n10 = n % 10, n100 = n % 100;
+      return n10 === 1 && n100 !== 11 ? a : (n10 >= 2 && n10 <= 4 && (n100 < 10 || n100 >= 20) ? b : c); };
     async function sha256hex(value){
       const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
       return [...new Uint8Array(buffer)].map(byte => byte.toString(16).padStart(2,'0')).join('');
     }
-    async function loadLocations(){
-      try{
-        const response = await fetch('./locations.json');
-        if(!response.ok) throw new Error('Список не загрузился');
-        const locations = await response.json();
-        const grid = document.getElementById('grid');
-        document.getElementById('total').textContent = locations.length;
-        for(const location of locations){
-          const card = document.createElement('a');
-          card.className = 'location-card';
-          card.href = DISK_URL + encodeURIComponent(location.name);
-          card.target = '_blank';
-          card.rel = 'noopener';
-          card.dataset.search = norm(location.name);
-          const image = document.createElement('img');
-          image.src = location.image;
-          image.alt = '';
-          image.loading = 'lazy';
-          const title = document.createElement('span');
-          title.className = 'location-name';
-          title.textContent = location.name;
-          const action = document.createElement('span');
-          action.className = 'location-action';
-          action.textContent = 'Смотреть материалы ↗';
-          card.append(image,title,action);
-          grid.append(card);
+    // подборка площадок по ссылке ?s=…&e=…&h=…&t=… — со своим временным паролем
+    let PICK = null;
+    try{ const q = new URLSearchParams(location.search);
+      if(q.get('s')) PICK = { s:q.get('s'), ids:q.get('s').split('.').filter(Boolean), e:q.get('e')||'', h:q.get('h')||'', t:q.get('t')||'' };
+    }catch(error){}
+    function parseYYMMDD(d){ if(!d) return null; const t = new Date(2000+parseInt(d.slice(0,2),10), parseInt(d.slice(2,4),10)-1, parseInt(d.slice(4,6),10)); t.setHours(0,0,0,0); return t; }
+
+    let LOCS = [];
+    function card(loc){
+      const el = document.createElement('a');
+      el.className = 'location-card';
+      el.href = loc.url || (DISK_URL + encodeURIComponent(loc.name));
+      el.target = '_blank'; el.rel = 'noopener';
+      el.dataset.search = norm(loc.name + ' ' + (loc.for || '') + ' ' + (loc.trip || ''));
+      const wrap = document.createElement('span'); wrap.className = 'location-img';
+      const image = document.createElement('img'); image.src = loc.image; image.alt = ''; image.loading = 'lazy';
+      wrap.append(image);
+      if(loc.status && STATUS[loc.status]){
+        const b = document.createElement('span'); b.className = 'loc-badge loc-' + loc.status; b.textContent = STATUS[loc.status];
+        wrap.append(b);
+      }
+      const title = document.createElement('span'); title.className = 'location-name'; title.textContent = loc.name;
+      el.append(wrap, title);
+      if(loc.for){ const f = document.createElement('span'); f.className = 'location-for'; f.textContent = 'Под объект: ' + loc.for; el.append(f); }
+      const action = document.createElement('span'); action.className = 'location-action'; action.textContent = 'Смотреть материалы ↗';
+      el.append(action);
+      return el;
+    }
+    function render(view, only){
+      const list = document.getElementById('list'); list.innerHTML = '';
+      let items = only || LOCS;
+      if(view === 'approved') items = items.filter(l => l.status === 'approved');
+      if(view === 'reserve') items = items.filter(l => l.status === 'reserve');
+      const trips = [];
+      for(const l of items){ const t = l.trip || ''; let g = trips.find(x => x.t === t); if(!g){ g = { t, items: [] }; trips.push(g); } g.items.push(l); }
+      for(const g of trips){
+        const sec = document.createElement('section');
+        if(trips.length > 1 || g.t){
+          const head = document.createElement('div'); head.className = 'role-head';
+          head.innerHTML = '<span class="role-name"></span><span class="role-count"></span>';
+          head.children[0].textContent = g.t || 'Без поездки';
+          head.children[1].textContent = g.items.length + ' ' + plural(g.items.length, 'площадка', 'площадки', 'площадок');
+          sec.append(head);
         }
-        document.getElementById('search').addEventListener('input', event => {
-          const query = norm(event.target.value);
-          let visible = 0;
-          for(const card of grid.children){
-            const show = !query || card.dataset.search.includes(query);
-            card.hidden = !show;
-            if(show) visible++;
-          }
-          document.getElementById('empty').style.display = visible ? 'none' : 'block';
+        const grid = document.createElement('div'); grid.className = 'grid';
+        g.items.forEach(l => grid.append(card(l)));
+        sec.append(grid); list.append(sec);
+      }
+      document.getElementById('empty').textContent = view === 'approved' ? 'Утверждённых площадок пока нет'
+        : (view === 'reserve' ? 'Запасных площадок пока нет' : 'Ничего не найдено');
+      applySearch();
+    }
+    function applySearch(){
+      const query = norm(document.getElementById('search').value);
+      let visible = 0;
+      document.querySelectorAll('#list section').forEach(sec => {
+        let any = 0;
+        sec.querySelectorAll('.location-card').forEach(c => { const show = !query || c.dataset.search.includes(query); c.hidden = !show; if(show) any++; });
+        sec.style.display = any ? '' : 'none'; visible += any;
+      });
+      document.getElementById('empty').style.display = visible ? 'none' : 'block';
+    }
+    async function loadLocations(){
+      const response = await fetch('./locations.json', { cache: 'no-store' });
+      if(!response.ok) throw new Error('Список не загрузился');
+      LOCS = await response.json();
+      return LOCS;
+    }
+    async function buildPage(){
+      try{
+        await loadLocations();
+        document.getElementById('total').textContent = LOCS.length;
+        document.getElementById('total-appr').textContent = LOCS.filter(l => l.status === 'approved').length;
+        document.getElementById('total-res').textContent = LOCS.filter(l => l.status === 'reserve').length;
+        render('all');
+        document.getElementById('search').addEventListener('input', applySearch);
+        const toggle = document.getElementById('view-toggle');
+        toggle.addEventListener('click', ev => {
+          const btn = ev.target.closest('button[data-view]'); if(!btn) return;
+          toggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+          render(btn.dataset.view);
         });
       }catch(error){
         document.getElementById('empty').textContent = 'Не удалось загрузить список площадок. Обновите страницу.';
         document.getElementById('empty').style.display = 'block';
       }
     }
+    async function buildPick(){
+      document.getElementById('gate')?.remove();
+      document.getElementById('app').hidden = false;
+      ['.section-nav', '.stat-row', '.find', '#view-toggle', 'footer'].forEach(sel => { const el = document.querySelector(sel); if(el) el.style.display = 'none'; });
+      document.querySelector('header .eyebrow').textContent = 'Подборка площадок';
+      document.querySelector('header h1').textContent = PICK.t || 'Подборка площадок';
+      document.title = PICK.t || 'Подборка площадок';
+      try{
+        await loadLocations();
+        const ids = await Promise.all(LOCS.map(l => sha256hex('LOC|' + l.name)));
+        const byId = {}; ids.forEach((h, i) => { byId[h.slice(0, 8)] = LOCS[i]; });
+        const chosen = PICK.ids.map(id => byId[id.toLowerCase()]).filter(Boolean);
+        document.querySelector('header .lede').textContent = chosen.length + ' ' + plural(chosen.length, 'площадка', 'площадки', 'площадок');
+        render('all', chosen);
+      }catch(error){
+        document.getElementById('empty').textContent = 'Не удалось загрузить подборку. Обновите страницу.';
+        document.getElementById('empty').style.display = 'block';
+      }
+    }
     function unlock(){
       document.getElementById('gate').remove();
       document.getElementById('app').hidden = false;
-      loadLocations();
+      buildPage();
+    }
+    if(PICK){
+      const lock = document.querySelector('#gate .lock'), form = document.getElementById('gate-form'), err = document.getElementById('gate-err');
+      const today = new Date(); today.setHours(0,0,0,0); const exp = parseYYMMDD(PICK.e);
+      if(!PICK.h || !exp){ lock.textContent = 'Ссылка устарела'; form.style.display = 'none'; err.textContent = 'Попроси новую ссылку у того, кто её прислал.'; }
+      else if(exp < today){ lock.textContent = 'Срок действия ссылки истёк'; form.style.display = 'none'; err.textContent = 'Попроси новую ссылку у того, кто её прислал.'; }
+      else { lock.textContent = 'Подборка площадок. Пароль есть в сообщении';
+        try{ if(sessionStorage.getItem('pick:' + PICK.h) === '1') buildPick(); }catch(error){} }
     }
     document.getElementById('gate-form').addEventListener('submit', async event => {
       event.preventDefault();
-      const hash = await sha256hex(document.getElementById('gate-pass').value);
+      const val = document.getElementById('gate-pass').value;
+      if(PICK){
+        const ph = await sha256hex(val.replace(/\s+/g, '').toLowerCase() + '|' + PICK.s + '|' + PICK.e);
+        if(ph.slice(0, 16) === PICK.h){ try{ sessionStorage.setItem('pick:' + PICK.h, '1'); }catch(error){} buildPick(); }
+        else document.getElementById('gate-err').textContent = 'Неверный пароль';
+        return;
+      }
+      const hash = await sha256hex(val);
       if(hash === PASS_HASH){
         try{ sessionStorage.setItem('unlocked','1'); }catch(error){}
         unlock();
@@ -157,7 +244,7 @@
         document.getElementById('gate-err').textContent = 'Неверный пароль';
       }
     });
-    try{ if(sessionStorage.getItem('unlocked') === '1') unlock(); }catch(error){}
+    try{ if(!PICK && sessionStorage.getItem('unlocked') === '1') unlock(); }catch(error){}
   </script>
 </body>
 </html>
