@@ -290,6 +290,7 @@
   }
 </style>
 <link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="measurements.css">
 </head>
 <body>
 
@@ -470,6 +471,7 @@
       '<div class="links">'+
         '<a class="'+(a.n_photo?'':'void')+'" href="'+photoHref+'" target="_blank" rel="noopener">фото</a>'+
         '<a class="'+(a.n_video?'':'void')+'" href="'+videoHref+'" target="_blank" rel="noopener">видео</a>'+
+        (a.approved ? '<button type="button" class="measure-button" data-role="'+encodeURIComponent(character)+'" data-actor="'+encodeURIComponent(a.actor)+'">Мерки</button>' : '')+
       '</div>';
   }
 
@@ -767,6 +769,7 @@
     });
   }
 </script>
+<script src="measurements.js"></script>
 </body>
 </html>
 
