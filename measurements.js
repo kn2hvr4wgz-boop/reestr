@@ -140,9 +140,16 @@
           credentials: "omit", cache: "no-store", signal: signal
         });
         if (version !== requestVersion || modal.hidden) return;
-        if (!scanResponse.ok) throw new Error("scan");
-        scanObjectUrl = URL.createObjectURL(await scanResponse.blob());
-        scan.src = scanObjectUrl;
+        if (scanResponse.ok) {
+          scanObjectUrl = URL.createObjectURL(await scanResponse.blob());
+          scan.src = scanObjectUrl;
+        } else {
+          scan.remove();
+          var unavailable = document.createElement("p");
+          unavailable.className = "measure-scan-note";
+          unavailable.textContent = "Скан листа временно недоступен.";
+          result.appendChild(unavailable);
+        }
       }
       if (version !== requestVersion || modal.hidden) return;
       result.hidden = false;
