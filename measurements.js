@@ -24,6 +24,12 @@
     modal.addEventListener("click", function (event) { if (event.target === modal) closeModal(); });
     modal.querySelector(".measure-forget").addEventListener("click", function () {
       sharedPassword = "";
+      requestVersion++;
+      if (currentController) currentController.abort();
+      currentController = null;
+      if (scanObjectUrl) URL.revokeObjectURL(scanObjectUrl);
+      scanObjectUrl = "";
+      modal.querySelector(".measure-result").replaceChildren();
       modal.querySelector(".measure-result").hidden = true;
       modal.querySelector(".measure-auth").hidden = false;
       modal.querySelector("#measure-password").value = "";
@@ -66,10 +72,10 @@
     var form = box.querySelector(".measure-auth");
     form.hidden = false;
     box.querySelector(".measure-status").textContent = sharedPassword ? "Загружаю мерки…" : "Введите пароль, чтобы посмотреть мерки.";
-    if (sharedPassword) loadMeasurements();
-    else box.querySelector("#measure-password").focus();
     box.dataset.role = role;
     box.dataset.actor = actor;
+    if (sharedPassword) loadMeasurements();
+    else box.querySelector("#measure-password").focus();
   }
 
   function errorMessage(status, payload) {
