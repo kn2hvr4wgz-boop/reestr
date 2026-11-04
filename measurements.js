@@ -1,6 +1,6 @@
 (function () {
   "use strict";
-  var API = "https://measurements.201-24-48-93.sslip.io";
+  var API = "https://measures.201.24.48.93.nip.io";
   var sharedPassword = "";
   var modal, currentController = null, requestVersion = 0, scanObjectUrl = "";
 
