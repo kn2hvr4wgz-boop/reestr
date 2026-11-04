@@ -15,7 +15,7 @@
       '<div class="measure-identity"><img class="measure-portrait" alt=""><div><strong class="measure-actor"></strong><div class="measure-role"></div></div></div>' +
       '<form class="measure-auth" autocomplete="off"><label for="measure-password">Общий пароль команды</label>' +
       '<div class="measure-auth-row"><input id="measure-password" type="password" required autocomplete="current-password"><button type="submit">Показать</button></div>' +
-      '<p class="measure-status" role="status"></p></form>' +
+      '</form><p class="measure-status" role="status"></p>' +
       '<div class="measure-result" hidden></div>' +
       '<button type="button" class="measure-forget">Забыть пароль</button>' +
       '</section>';
@@ -88,6 +88,29 @@
     return "Не удалось загрузить мерки. Попробуйте ещё раз.";
   }
 
+  async function fetchPrivate(url, signal) {
+    for (var attempt = 0; attempt < 2; attempt++) {
+      if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
+      var controller = new AbortController();
+      var cancel = function () { controller.abort(); };
+      signal.addEventListener("abort", cancel, { once: true });
+      var timer = setTimeout(function () { controller.abort(); }, 8000);
+      try {
+        return await fetch(url, {
+          method: "GET", headers: { "Authorization": "Bearer " + sharedPassword },
+          credentials: "omit", cache: "no-store", signal: controller.signal
+        });
+      } catch (error) {
+        if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
+        if (attempt === 1) throw new Error("connection_failed");
+        modal.querySelector(".measure-status").textContent = "Повторяю соединение с сервером…";
+      } finally {
+        clearTimeout(timer);
+        signal.removeEventListener("abort", cancel);
+      }
+    }
+  }
+
   async function loadMeasurements() {
     var box = modal, role = box.dataset.role, actor = box.dataset.actor;
     var form = box.querySelector(".measure-auth"), status = box.querySelector(".measure-status");
@@ -101,10 +124,7 @@
     status.textContent = "Загружаю мерки…";
     var params = new URLSearchParams({ role: role, actor: actor });
     try {
-      var response = await fetch(API + "/api/measurements?" + params.toString(), {
-        method: "GET", headers: { "Authorization": "Bearer " + sharedPassword },
-        credentials: "omit", cache: "no-store", signal: signal
-      });
+      var response = await fetchPrivate(API + "/api/measurements?" + params.toString(), signal);
       var payload = await response.json().catch(function () { return {}; });
       if (version !== requestVersion || modal.hidden) return;
       if (!response.ok) {
@@ -141,10 +161,7 @@
         scan.alt = "Скан листа мерок";
         result.appendChild(scan);
         var scanParams = new URLSearchParams({ role: role, actor: actor });
-        var scanResponse = await fetch(API + payload.scanUrl + "?" + scanParams.toString(), {
-          method: "GET", headers: { "Authorization": "Bearer " + sharedPassword },
-          credentials: "omit", cache: "no-store", signal: signal
-        });
+        var scanResponse = await fetchPrivate(API + payload.scanUrl + "?" + scanParams.toString(), signal);
         if (version !== requestVersion || modal.hidden) return;
         if (scanResponse.ok) {
           scanObjectUrl = URL.createObjectURL(await scanResponse.blob());
